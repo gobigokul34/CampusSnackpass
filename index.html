@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SnackPass</title>
+<style>
+  :root {
+    --brand-color: #ec720d;
+    --brand-hover: #b14904;
+    --bg-color: #f0f2f5;
+    --card-bg: #ffffff;
+    --text-primary: #1a1a1a;
+    --text-muted: #666666;
+    --border-color: #e0e0e0;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+  }
+
+  .navbar {
+    background: var(--brand-color);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .brand-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--brand-color);
+    font-weight: 800;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .category-bar {
+    padding: 18px 24px 6px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .cat-btn {
+    padding: 9px 18px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .cat-btn.active, .cat-btn:hover {
+    background: var(--brand-color);
+    color: #fff;
+    border-color: var(--brand-color);
+  }
+
+  .app-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    padding: 18px 24px 24px;
+  }
+
+  #catalog {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 18px;
+  }
+
+  .food-card {
+    background: var(--card-bg);
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .food-card img {
+    width: 100%;
+    height: 130px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  .food-card h3 {
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+  }
+
+  .food-card .category-tag {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .food-card .price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--brand-color);
+    margin-bottom: 10px;
+  }
+
+  .btn-action, .btn-submit {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background: var(--brand-color);
+    color: #fff;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-action:hover, .btn-submit:hover {
+    background: var(--brand-hover);
+  }
+
+  .btn-submit:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+
+  .cart-panel {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    height: fit-content;
+  }
+
+  .cart-panel h2 {
+    font-size: 1.2rem;
+    margin-bottom: 14px;
+    border-bottom: 2px solid var(--bg-color);
+    padding-bottom: 8px;
+  }
+
+  .cart-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border-color);
+  }
+
+  .qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .qty-btn {
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .summary-row {
+    margin: 16px 0;
+    font-size: 1.1rem;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .d-none {
+    display: none !important;
+  }
+
+  #receiptView {
+    max-width: 450px;
+    margin: 50px auto;
+    background: #fff;
+    padding: 28px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+
+  @media(max-width: 820px) {
+    .app-layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="brand-badge">Q</div>
+  <h2>SnackPass</h2>
+</header>
+
+<div class="category-bar">
+  <button class="cat-btn active" data-group="All">All Items</button>
+  <button class="cat-btn" data-group="Snacks">Snacks</button>
+  <button class="cat-btn" data-group="Drinks">Drinks</button>
+  <button class="cat-btn" data-group="Meals">Meals</button>
+</div>
+
+<main class="app-layout" id="workspace">
+  <section id="catalog"></section>
+
+  <aside class="cart-panel">
+    <h2>Checkout Cart</h2>
+    <div id="basketEntries"><p style="color:var(--text-muted)">Your cart is empty.</p></div>
+    <div class="summary-row">
+      <span>Total:</span>
+      <strong id="grandTotal">₹0</strong>
+    </div>
+    <button id="checkoutBtn" class="btn-submit" disabled>Place Order</button>
+  </aside>
+</main>
+
+<section id="receiptView" class="d-none"></section>
+
+<script>
+const menuItems = [
+  { id: 101, title: "Veggie Burger", category: "Snacks", price: 80, thumb: "https://via.placeholder.com/300x180?text=Veggie+Burger" },
+  { id: 102, title: "Crispy Fries", category: "Snacks", price: 60, thumb: "https://via.placeholder.com/300x180?text=Crispy+Fries" },
+  { id: 103, title: "Iced Cold Coffee", category: "Drinks", price: 70, thumb: "https://via.placeholder.com/300x180?text=Cold+Coffee" },
+  { id: 104, title: "Fresh Lemonade", category: "Drinks", price: 40, thumb: "https://via.placeholder.com/300x180?text=Lemonade" },
+  { id: 105, title: "Special Fried Rice", category: "Meals", price: 120, thumb: "https://via.placeholder.com/300x180?text=Fried+Rice" },
+  { id: 106, title: "Paneer Grilled Wrap", category: "Meals", price: 110, thumb: "https://via.placeholder.com/300x180?text=Paneer+Wrap" }
+];
+
+let userCart = [];
+
+const gridElement = document.getElementById("catalog");
+const basketElement = document.getElementById("basketEntries");
+const totalElement = document.getElementById("grandTotal");
+const placeOrderBtn = document.getElementById("checkoutBtn");
+
+function displayMenu(dataset) {
+  gridElement.innerHTML = dataset.map(item => `
+    <article class="food-card">
+      <img src="${item.thumb}" alt="${item.title}">
+      <div>
+        <h3>${item.title}</h3>
+        <div class="category-tag">${item.category}</div>
+        <div class="price">₹${item.price}</div>
+      </div>
+      <button class="btn-action" onclick="addItem(${item.id})">Add Item</button>
+    </article>
+  `).join('');
+}
+
+document.querySelectorAll(".cat-btn").forEach(button => {
+  button.addEventListener("click", (e) => {
+    document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+    e.target.classList.add("active");
+    const group = e.target.dataset.group;
+    displayMenu(group === "All" ? menuItems : menuItems.filter(entry => entry.category === group));
+  });
+});
+
+function addItem(selectedId) {
+  const existing = userCart.find(entry => entry.id === selectedId);
+  if (existing) {
+    existing.count++;
+  } else {
+    const product = menuItems.find(entry => entry.id === selectedId);
+    userCart.push({ ...product, count: 1 });
+  }
+  updateCartDisplay();
+}
+
+function adjustQty(selectedId, change) {
+  const item = userCart.find(entry => entry.id === selectedId);
+  if (!item) return;
+
+  item.count += change;
+  if (item.count <= 0) {
+    userCart = userCart.filter(entry => entry.id !== selectedId);
+  }
+  updateCartDisplay();
+}
+
+function updateCartDisplay() {
+  if (userCart.length === 0) {
+    basketElement.innerHTML = '<p style="color:var(--text-muted)">Your cart is empty.</p>';
+    totalElement.textContent = "₹0";
+    placeOrderBtn.disabled = true;
+    return;
+  }
+
+  let finalSum = 0;
+  basketElement.innerHTML = userCart.map(item => {
+    finalSum += item.price * item.count;
+    return `
+      <div class="cart-row">
+        <div>
+          <strong>${item.title}</strong>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">₹${item.price}</div>
+        </div>
+        <div class="qty-controls">
+          <button class="qty-btn" onclick="adjustQty(${item.id}, -1)">-</button>
+          <span>${item.count}</span>
+          <button class="qty-btn" onclick="adjustQty(${item.id}, 1)">+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  totalElement.textContent = "₹" + finalSum;
+  placeOrderBtn.disabled = false;
+}
+
+function generateOrderCode() {
+  const hash = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const num = Math.floor(100 + Math.random() * 900);
+  return `QB-${hash}${num}`;
+}
+
+placeOrderBtn.addEventListener("click", () => {
+  if (!userCart.length) return;
+
+  const itemListHTML = userCart.map(item => `<li style="margin-bottom:4px;">${item.title} &times; ${item.count}</li>`).join('');
+  
+  document.getElementById("workspace").classList.add("d-none");
+  const confirmationArea = document.getElementById("receiptView");
+  confirmationArea.classList.remove("d-none");
+
+  confirmationArea.innerHTML = `
+    <h2 style="color:var(--brand-color);margin-bottom:10px;">Order Success!</h2>
+    <p style="margin-bottom:12px;"><strong>Order Reference:</strong> ${generateOrderCode()}</p>
+    <ul style="text-align:left;display:inline-block;margin: 10px 0 18px 20px;">${itemListHTML}</ul>
+    <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">Kitchen Status: In Preparation</p>
+    <button class="btn-action" id="resetAppBtn">Start New Order</button>
+  `;
+
+  userCart = [];
+  updateCartDisplay();
+
+  document.getElementById("resetAppBtn").addEventListener("click", () => {
+    confirmationArea.classList.add("d-none");
+    document.getElementById("workspace").classList.remove("d-none");
+    displayMenu(menuItems);
+  });
+});
+
+displayMenu(menuItems);
+</script>
+</body>
+</html>
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/msmohan2007-web/CampusSnackpass
+git push -u origin main
